@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIVEO — Démo Plateforme</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111C33;--navy2:#1A2744;--bronze:#A67C52;--bronze2:#C4976A;--cream:#F7F5F1;--white:#fff;--border:#E8E0D5;--muted:#7A7A8A;--success:#2D7D52;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Raleway',sans-serif;background:var(--cream);color:var(--navy);}
+
+/* ── TOKEN GATE ── */
+#token-gate{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px;text-align:center;}
+#token-gate .logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:#fff;letter-spacing:.06em;margin-bottom:6px;}
+#token-gate .logo span{color:var(--bronze);}
+#token-gate .sub{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:32px;}
+#token-gate .msg{font-size:13px;color:rgba(255,255,255,.5);max-width:340px;line-height:1.6;}
+#token-gate .err{color:#ef4444;font-size:13px;max-width:360px;line-height:1.6;}
+#token-gate a{color:var(--bronze);font-size:13px;margin-top:16px;display:inline-block;text-decoration:none;}
+.spinner{width:28px;height:28px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--bronze);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 20px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── DEMO APP ── */
+#demo-app{display:none;min-height:100vh;}
+.topbar{background:var(--navy);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100;}
+.tb-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;}
+.tb-logo span{color:var(--bronze);}
+.tb-badge{font-size:10px;background:rgba(166,124,82,.18);border:1px solid rgba(166,124,82,.3);color:var(--bronze2);padding:3px 10px;border-radius:10px;margin-left:10px;letter-spacing:.08em;}
+.tb-nav{display:flex;gap:2px;}
+.tn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.45);background:none;border:none;font-family:'Raleway',sans-serif;transition:all .15s;}
+.tn:hover{color:rgba(255,255,255,.8);}
+.tn.active{color:var(--bronze2);background:rgba(255,255,255,.07);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--bronze),var(--bronze2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;color:#fff;font-weight:700;}
+.tb-name{font-size:12px;color:rgba(255,255,255,.5);}
+
+.page{display:none;padding:28px 32px;max-width:1160px;margin:0 auto;}
+.page.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── KPIs ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:18px 20px;}
+.kpi-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.kpi-value{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--navy);}
+.kpi-value.bronze{color:var(--bronze);}
+.kpi-value.green{color:var(--success);}
+.kpi-meta{font-size:11px;color:var(--muted);margin-top:4px;}
+.kpi-bar{height:4px;background:var(--border);border-radius:2px;margin-top:10px;}
+.kpi-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--navy),var(--bronze));transition:width 1.2s ease;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:20px 22px;}
+.card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* ── TABLE ── */
+.table{width:100%;border-collapse:collapse;font-size:13px;}
+.table th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 12px 10px;}
+.table td{padding:11px 12px;border-top:1px solid var(--border);}
+.table tr:hover td{background:#fafaf7;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;}
+.bg{background:#E8F5E9;color:var(--success);}
+.bo{background:#FFF8E1;color:#B8860B;}
+.bn{background:rgba(166,124,82,.12);color:var(--bronze);}
+.bm{background:var(--cream);color:var(--muted);}
+.bb{background:#EEF2FF;color:#6366f1;}
+
+/* ── PIPELINE ── */
+.pipe-cols{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.pipe-col{background:var(--cream);border-radius:10px;padding:12px;}
+.pipe-col-hd{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.pipe-count{background:var(--navy);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;}
+.pipe-card{background:var(--white);border-radius:8px;border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.pipe-card:hover{border-color:var(--bronze);}
+.pipe-card-name{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.pipe-card-prog{font-size:11px;color:var(--muted);}
+.pipe-card-montant{font-size:12px;font-weight:700;color:var(--bronze);margin-top:6px;}
+
+/* ── SIMULATOR ── */
+.sim-result{background:linear-gradient(135deg,var(--navy),#1e2f50);border-radius:12px;padding:24px;color:#fff;margin-top:16px;}
+.sim-result-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;}
+.sim-result-value{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--bronze2);}
+.sim-result-sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.input-field{display:flex;flex-direction:column;gap:5px;}
+.input-field label{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;}
+.input-field input,
+.input-field select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Raleway',sans-serif;color:var(--navy);background:var(--white);}
+.input-field input:focus,
+.input-field select:focus{outline:none;border-color:var(--bronze);}
+.btn-primary{background:var(--bronze);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;transition:opacity .15s;}
+.btn-primary:hover{opacity:.85;}
+.welcome-banner{background:linear-gradient(135deg,var(--navy) 0%,#1e3060 100%);border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;}
+.welcome-banner::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(166,124,82,.18) 0%,transparent 70%);border-radius:50%;}
+.wb-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;}
+.wb-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;}
+.wb-sub{font-size:13px;color:rgba(255,255,255,.5);}
+</style>
+</head>
+<body>
+
+<!-- ── TOKEN GATE ── -->
+<div id="token-gate">
+  <div class="logo">VIVEO<span>.</span></div>
+  <div class="sub">Patrimoine · Conseil Indépendant</div>
+  <div class="spinner"></div>
+  <div class="msg" id="gate-msg">Vérification de votre accès personnalisé…</div>
+</div>
+
+<!-- ── DEMO APP ── -->
+<div id="demo-app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center">
+      <div class="tb-logo">VIVEO<span>.</span></div>
+      <div class="tb-badge">DÉMO PERSONNALISÉE</div>
+    </div>
+    <div class="tb-nav">
+      <button class="tn active" onclick="showPage('dashboard',this)">Dashboard</button>
+      <button class="tn" onclick="showPage('pipeline',this)">Pipeline CRM</button>
+      <button class="tn" onclick="showPage('prospects',this)">Prospects</button>
+      <button class="tn" onclick="showPage('simulateur',this)">Simulateur Fiscal</button>
+      <button class="tn" onclick="showPage('programmes',this)">Programmes</button>
+    </div>
+    <div class="tb-right">
+      <div class="tb-name" id="user-name">Thomas Blanchard</div>
+      <div class="tb-av">TB</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="welcome-banner">
+      <div class="wb-label">Tableau de bord · Mars 2026</div>
+      <div class="wb-title" id="welcome-title">Bonjour, découvrez la plateforme VIVEO</div>
+      <div class="wb-sub">Pilotez votre activité patrimoniale avec une vue complète en temps réel</div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">CA Prévisionnel</div>
+        <div class="kpi-value bronze">284 k€</div>
+        <div class="kpi-meta">+18% vs N-1</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:71%"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Dossiers actifs</div>
+        <div class="kpi-value">43</div>
+        <div class="kpi-meta">12 en signature</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:58%"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Prospects chauds</div>
+        <div class="kpi-value green">17</div>
+        <div class="kpi-meta">5 RDV cette semaine</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:45%"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Taux conversion</div>
+        <div class="kpi-value">34%</div>
+        <div class="kpi-meta">Objectif : 40%</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:34%"></div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Dernières activités</div>
+        <table class="table">
+          <tbody>
+            <tr><td><strong>Sophie Martin</strong><br><span style="font-size:11px;color:var(--muted)">LMNP · Résidence Senior</span></td><td><span class="badge bg">Signé</span></td><td style="color:var(--muted);font-size:12px">Il y a 2h</td></tr>
+            <tr><td><strong>Pierre Dubois</strong><br><span style="font-size:11px;color:var(--muted)">Deficit Foncier · TMI 41%</span></td><td><span class="badge bo">En cours</span></td><td style="color:var(--muted);font-size:12px">Hier</td></tr>
+            <tr><td><strong>Marie Leclerc</strong><br><span style="font-size:11px;color:var(--muted)">Nue-propriété · Lyon</span></td><td><span class="badge bn">RDV planifié</span></td><td style="color:var(--muted);font-size:12px">23 mars</td></tr>
+            <tr><td><strong>Jean-Paul Morin</strong><br><span style="font-size:11px;color:var(--muted)">LMNP Géré · Résidence étudiants</span></td><td><span class="badge bb">Livré</span></td><td style="color:var(--muted);font-size:12px">20 mars</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Pipeline par dispositif</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>LMNP / LMNP Géré</span><span style="font-weight:700">38%</span></div>
+            <div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:38%;background:var(--bronze);border-radius:3px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Déficit Foncier</span><span style="font-weight:700">26%</span></div>
+            <div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:26%;background:var(--navy);border-radius:3px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Nue-propriété</span><span style="font-weight:700">18%</span></div>
+            <div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:18%;background:#6366f1;border-radius:3px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Monuments Historiques</span><span style="font-weight:700">11%</span></div>
+            <div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:11%;background:var(--success);border-radius:3px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Autres dispositifs</span><span style="font-weight:700">7%</span></div>
+            <div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:7%;background:var(--muted);border-radius:3px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="page" id="page-pipeline">
+    <div class="card-title" style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;color:var(--navy)">Pipeline CRM — Vue Kanban</div>
+    <div class="pipe-cols">
+      <div class="pipe-col">
+        <div class="pipe-col-hd">Nouveau <span class="pipe-count">4</span></div>
+        <div class="pipe-card"><div class="pipe-card-name">Laurent Petit</div><div class="pipe-card-prog">Déficit foncier · TMI 41%</div><div class="pipe-card-montant">Budget 120 k€</div></div>
+        <div class="pipe-card"><div class="pipe-card-name">Isabelle Roy</div><div class="pipe-card-prog">LMNP · Résidence senior</div><div class="pipe-card-montant">Budget 180 k€</div></div>
+        <div class="pipe-card"><div class="pipe-card-name">Marc Fontaine</div><div class="pipe-card-prog">Nue-propriété · Paris</div><div class="pipe-card-montant">Budget 250 k€</div></div>
+        <div class="pipe-card"><div class="pipe-card-name">Cécile Blanc</div><div class="pipe-card-prog">Loi Malraux · Lille</div><div class="pipe-card-montant">Budget 95 k€</div></div>
+      </div>
+      <div class="pipe-col">
+        <div class="pipe-col-hd">Qualifié <span class="pipe-count">5</span></div>
+        <div class="pipe-card" style="border-left:3px solid var(--bronze)"><div class="pipe-card-name">Sophie Martin</div><div class="pipe-card-prog">LMNP Géré · Rés. étudiants</div><div class="pipe-card-montant">Commission 14 k€</div></div>
+        <div class="pipe-card"><div class="pipe-card-name">Pierre Dubois</div><div class="pipe-card-prog">Déficit Foncier · Bruxelles</div><div class="pipe-card-montant">Commission 18 k€</div></div>
+        <div class="pipe-card"><div class="pipe-card-name">Anne Renard</div><div class="pipe-card-prog">LMNP · Marseille</div><div class="pipe-card-montant">Commission 11 k€</div></div>
+      </div>
+      <div class="pipe-col">
+        <div class="pipe-col-hd">Proposition <span class="pipe-count">3</span></div>
+        <div class="pipe-card" style="border-left:3px solid #6366f1"><div class="pipe-card-name">Jean-Claude Morin</div><div class="pipe-card-prog">Mon. Historiques · TMI 45%</div><div class="pipe-card-montant">Commission 22 k€</div></div>
+        <div class="pipe-card"><div class="pipe-card-name">Marie Leclerc</div><div class="pipe-card-prog">Nue-propriété · Lyon</div><div class="pipe-card-montant">Commission 16 k€</div></div>
+      </div>
+      <div class="pipe-col">
+        <div class="pipe-col-hd">Signature <span class="pipe-count">6</span></div>
+        <div class="pipe-card" style="border-left:3px solid var(--success)"><div class="pipe-card-name">Paul Bernard</div><div class="pipe-card-prog">LMNP Géré · Bordeaux</div><div class="pipe-card-montant">Commission 13 k€</div></div>
+        <div class="pipe-card" style="border-left:3px solid var(--success)"><div class="pipe-card-name">Lucie Moreau</div><div class="pipe-card-prog">Loi Jeanbrun · Roubaix</div><div class="pipe-card-montant">Commission 9 k€</div></div>
+        <div class="pipe-card" style="border-left:3px solid var(--success)"><div class="pipe-card-name">Thomas Girard</div><div class="pipe-card-prog">Déficit Foncier · Paris</div><div class="pipe-card-montant">Commission 19 k€</div></div>
+      </div>
+      <div class="pipe-col">
+        <div class="pipe-col-hd">Livré <span class="pipe-count">8</span></div>
+        <div class="pipe-card" style="opacity:.7"><div class="pipe-card-name">Équipe Nord</div><div class="pipe-card-prog">Q1 2026 · 8 dossiers</div><div class="pipe-card-montant" style="color:var(--success)">+94 k€ CA</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROSPECTS -->
+  <div class="page" id="page-prospects">
+    <div class="card">
+      <div class="card-title">Base prospects — 247 contacts</div>
+      <table class="table">
+        <thead><tr>
+          <th>Prospect</th><th>Dispositif</th><th>TMI</th><th>Budget</th><th>Statut</th><th>Dernier contact</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><strong>Sophie Martin</strong><br><span style="font-size:11px;color:var(--muted)">sophie.martin@gmail.com</span></td><td>LMNP Géré</td><td>30%</td><td>180 k€</td><td><span class="badge bg">Chaud</span></td><td style="color:var(--muted);font-size:12px">28/03/2026</td></tr>
+          <tr><td><strong>Pierre Dubois</strong><br><span style="font-size:11px;color:var(--muted)">p.dubois@entreprise.fr</span></td><td>Déficit Foncier</td><td>41%</td><td>150 k€</td><td><span class="badge bo">Tiède</span></td><td style="color:var(--muted);font-size:12px">25/03/2026</td></tr>
+          <tr><td><strong>Marie Leclerc</strong><br><span style="font-size:11px;color:var(--muted)">marie.l@free.fr</span></td><td>Nue-propriété</td><td>41%</td><td>250 k€</td><td><span class="badge bg">Chaud</span></td><td style="color:var(--muted);font-size:12px">27/03/2026</td></tr>
+          <tr><td><strong>Jean-Claude Morin</strong><br><span style="font-size:11px;color:var(--muted)">jcmorin@yahoo.fr</span></td><td>Mon. Historiques</td><td>45%</td><td>300 k€</td><td><span class="badge bb">RDV planifié</span></td><td style="color:var(--muted);font-size:12px">22/03/2026</td></tr>
+          <tr><td><strong>Isabelle Roy</strong><br><span style="font-size:11px;color:var(--muted)">iroy@sfr.fr</span></td><td>LMNP</td><td>30%</td><td>120 k€</td><td><span class="badge bm">Froid</span></td><td style="color:var(--muted);font-size:12px">15/03/2026</td></tr>
+          <tr><td><strong>Laurent Petit</strong><br><span style="font-size:11px;color:var(--muted)">lpetit@hotmail.com</span></td><td>Loi Malraux</td><td>41%</td><td>95 k€</td><td><span class="badge bo">Tiède</span></td><td style="color:var(--muted);font-size:12px">20/03/2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIMULATEUR FISCAL -->
+  <div class="page" id="page-simulateur">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Simulateur fiscal IA</div>
+        <div class="input-row">
+          <div class="input-field">
+            <label>Revenus nets imposables</label>
+            <input type="number" id="sim-revenus" value="95000" oninput="simuler()">
+          </div>
+          <div class="input-field">
+            <label>Parts fiscales</label>
+            <input type="number" id="sim-parts" value="2" step="0.5" oninput="simuler()">
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="input-field">
+            <label>Dispositif</label>
+            <select id="sim-dispositif" onchange="simuler()">
+              <option value="lmnp">LMNP</option>
+              <option value="deficit">Déficit Foncier</option>
+              <option value="nue">Nue-propriété</option>
+              <option value="malraux">Loi Malraux</option>
+              <option value="mh">Monuments Historiques</option>
+            </select>
+          </div>
+          <div class="input-field">
+            <label>Montant investi</label>
+            <input type="number" id="sim-montant" value="150000" step="10000" oninput="simuler()">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="simuler()">Calculer l'économie fiscale</button>
+        <div class="sim-result" id="sim-result" style="display:none">
+          <div class="sim-result-label">Économie fiscale estimée / an</div>
+          <div class="sim-result-value" id="sim-eco">–</div>
+          <div class="sim-result-sub" id="sim-detail">–</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recommandation IA</div>
+        <div id="sim-reco" style="font-size:13px;color:var(--muted);line-height:1.7">
+          Renseignez les informations du prospect pour obtenir une recommandation personnalisée basée sur son profil fiscal et patrimonial.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRAMMES -->
+  <div class="page" id="page-programmes">
+    <div class="card">
+      <div class="card-title">Programmes disponibles — 14 actifs</div>
+      <table class="table">
+        <thead><tr>
+          <th>Programme</th><th>Dispositif</th><th>Localisation</th><th>Lots dispo</th><th>Prix moyen</th><th>Statut</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><strong>Le Clos Saint-Martin</strong><br><span style="font-size:11px;color:var(--muted)">Résidence senior premium</span></td><td>LMNP Géré</td><td>Lille (59)</td><td>8 / 42</td><td>185 k€</td><td><span class="badge bg">Disponible</span></td></tr>
+          <tr><td><strong>Hôtel Particulier Vauban</strong><br><span style="font-size:11px;color:var(--muted)">Rénovation patrimoniale</span></td><td>Déficit Foncier</td><td>Arras (62)</td><td>4 / 12</td><td>245 k€</td><td><span class="badge bg">Disponible</span></td></tr>
+          <tr><td><strong>Résidence Erasmus</strong><br><span style="font-size:11px;color:var(--muted)">Résidence étudiants</span></td><td>LMNP</td><td>Valenciennes (59)</td><td>12 / 60</td><td>98 k€</td><td><span class="badge bg">Disponible</span></td></tr>
+          <tr><td><strong>Villa Méditerranée</strong><br><span style="font-size:11px;color:var(--muted)">Appartements nue-propriété</span></td><td>Nue-propriété</td><td>Nice (06)</td><td>6 / 24</td><td>320 k€</td><td><span class="badge bo">Bientôt complet</span></td></tr>
+          <tr><td><strong>Manoir de la Marquise</strong><br><span style="font-size:11px;color:var(--muted)">Classé Monuments Historiques</span></td><td>Mon. Historiques</td><td>Douai (59)</td><td>3 / 8</td><td>480 k€</td><td><span class="badge bg">Disponible</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ltzrggtbgtypxncvhiwd.supabase.co';
+const SUPABASE_ANON_KEY = 'REMPLACER_PAR_SUPABASE_ANON_KEY';
+
+async function verifyToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  if (!token) {
+    showError('Lien invalide — aucun token fourni dans l\'URL.<br><br>Contactez votre conseiller VIVEO pour obtenir votre lien personnalisé.');
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/demo_tokens?token=eq.${encodeURIComponent(token)}&actif=eq.true&select=*`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+      showError('Lien invalide ou accès révoqué.<br><br>Contactez votre conseiller VIVEO.');
+      return;
+    }
+
+    const record = data[0];
+    if (new Date() > new Date(record.expire_at)) {
+      showError('Ce lien a expiré.<br><br>Contactez VIVEO pour obtenir un nouveau lien.');
+      return;
+    }
+
+    // Enregistrer la consultation
+    await fetch(`${SUPABASE_URL}/rest/v1/demo_tokens?id=eq.${record.id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        consulte_at: new Date().toISOString(),
+        nb_consultations: (record.nb_consultations || 0) + 1
+      })
+    });
+
+    // Personnaliser si prospect connu
+    if (record.prospect_nom) {
+      document.getElementById('welcome-title').textContent =
+        `Bonjour ${record.prospect_nom.split(' ')[0]}, découvrez la plateforme VIVEO`;
+    }
+
+    // Afficher la démo
+    document.getElementById('token-gate').style.display = 'none';
+    const app = document.getElementById('demo-app');
+    app.style.display = 'block';
+
+    // Tracker la durée
+    const start = Date.now();
+    window.addEventListener('beforeunload', () => {
+      const duree = Math.round((Date.now() - start) / 1000);
+      navigator.sendBeacon(
+        `${SUPABASE_URL}/rest/v1/rpc/increment_demo_duration`,
+        JSON.stringify({ token_id: record.id, duree_s: duree })
+      );
+    });
+
+    // Animer les barres KPI
+    setTimeout(() => {
+      document.querySelectorAll('.kpi-bar-fill').forEach(el => {
+        const w = el.style.width; el.style.width = '0';
+        setTimeout(() => { el.style.width = w; }, 50);
+      });
+    }, 200);
+
+  } catch (err) {
+    showError('Erreur de vérification.<br>Réessayez ou contactez VIVEO.');
+  }
+}
+
+function showError(msg) {
+  document.querySelector('.spinner').style.display = 'none';
+  document.getElementById('gate-msg').innerHTML =
+    `<div style="color:#ef4444;line-height:1.7">${msg}</div>
+     <a href="https://viveo-patrimoine.fr" style="color:var(--bronze);font-size:13px;margin-top:16px;display:inline-block">→ Retour sur viveo-patrimoine.fr</a>`;
+}
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// Simulateur fiscal interactif
+const TAUX = {
+  lmnp:   { label: 'LMNP', taux: 0.045, desc: 'Amortissement + charges déductibles' },
+  deficit:{ label: 'Déficit Foncier', taux: 0.062, desc: 'Imputable sur revenus fonciers et revenu global' },
+  nue:    { label: 'Nue-propriété', taux: 0.038, desc: 'Décote à l\'achat + revenus différés' },
+  malraux:{ label: 'Loi Malraux', taux: 0.075, desc: 'Réduction 22% ou 30% des travaux' },
+  mh:     { label: 'Monuments Historiques', taux: 0.095, desc: 'Déduction 100% des charges sur revenu global' },
+};
+function simuler() {
+  const revenus = parseFloat(document.getElementById('sim-revenus').value) || 0;
+  const parts = parseFloat(document.getElementById('sim-parts').value) || 1;
+  const montant = parseFloat(document.getElementById('sim-montant').value) || 0;
+  const d = document.getElementById('sim-dispositif').value;
+  const conf = TAUX[d];
+  const eco = Math.round(montant * conf.taux);
+  const fmt = n => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  document.getElementById('sim-result').style.display = 'block';
+  document.getElementById('sim-eco').textContent = fmt(eco);
+  document.getElementById('sim-detail').textContent = conf.desc + ' · Revenu imposable ' + fmt(revenus);
+  const tmi = revenus / parts > 73516 ? '41%' : revenus / parts > 28797 ? '30%' : '11%';
+  document.getElementById('sim-reco').innerHTML = `
+    <p style="margin-bottom:10px"><strong>Profil détecté :</strong> TMI estimée à <span style="color:var(--bronze);font-weight:700">${tmi}</span></p>
+    <p style="margin-bottom:10px">Pour un investissement de <strong>${fmt(montant)}</strong> en <strong>${conf.label}</strong>, l'économie fiscale annuelle estimée est de <span style="color:var(--success);font-weight:700">${fmt(eco)}</span>.</p>
+    <p>${conf.desc}. Ce dispositif est particulièrement adapté à votre tranche marginale d'imposition.</p>
+    <p style="margin-top:12px;font-size:11px;color:var(--muted)">* Simulation indicative — non contractuelle. Consultez votre conseiller VIVEO.</p>
+  `;
+}
+
+verifyToken();
+simuler();
+</script>
+</body>
+</html>
