@@ -326,15 +326,32 @@ html,body{height:100%;font-family:'Raleway',sans-serif;background:var(--cream);c
 </div>
 
 <script>
-const SUPABASE_URL = 'https://ltzrggtbgtypxncvhiwd.supabase.co';
-const SUPABASE_ANON_KEY = 'REMPLACER_PAR_SUPABASE_ANON_KEY';
+let SUPABASE_URL = '';
+let SUPABASE_ANON_KEY = '';
+
+async function loadConfig() {
+  try {
+    const r = await fetch('/api/config');
+    const c = await r.json();
+    SUPABASE_URL = c.supabaseUrl;
+    SUPABASE_ANON_KEY = c.supabaseAnonKey;
+  } catch(e) {
+    // fallback hardcodé si /api/config inaccessible
+    SUPABASE_URL = 'https://ltzrggtbgtypxncvhiwd.supabase.co';
+  }
+}
 
 async function verifyToken() {
+  await loadConfig();
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
 
   if (!token) {
     showError('Lien invalide — aucun token fourni dans l\'URL.<br><br>Contactez votre conseiller VIVEO pour obtenir votre lien personnalisé.');
+    return;
+  }
+  if (!SUPABASE_ANON_KEY) {
+    showError('Configuration manquante. Contactez VIVEO.');
     return;
   }
 
